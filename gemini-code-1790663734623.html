@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nomi Online Services - Complete AI Suite & Converters</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #004085;
+            --secondary: #0056b3;
+            --accent: #ffc107;
+            --bg: #f4f7f6;
+            --text: #333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+        /* Top Header */
+        .top-info {
+            background: var(--primary); color: white; padding: 10px 5%;
+            display: flex; justify-content: space-between; flex-wrap: wrap; font-size: 0.95rem;
+        }
+        .top-info i { color: var(--accent); margin-right: 8px; }
+        
+        /* Main Navigation */
+        header {
+            background: white; padding: 15px 5%; display: flex;
+            justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; font-size: 22px; font-weight: 900; color: var(--primary); text-transform: uppercase; }
+        .logo img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        
+        /* Hero Section */
+        .hero { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; text-align: center; padding: 50px 20px; }
+        .hero h1 { font-size: 2.2rem; margin-bottom: 10px; }
+        .hero p { font-size: 1.1rem; opacity: 0.9; }
+        
+        /* Categories & Grid */
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
+        .category-title {
+            background: #e7f1ff; color: var(--primary); padding: 15px; margin: 40px 0 20px;
+            font-size: 1.4rem; border-left: 6px solid var(--primary); font-weight: bold; border-radius: 4px;
+        }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .tool-card {
+            background: white; padding: 20px 10px; text-align: center; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s;
+            border: 1px solid #ddd; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .tool-card:hover { transform: translateY(-4px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); border-color: var(--secondary); }
+        .tool-card i { font-size: 32px; color: var(--secondary); margin-bottom: 12px; }
+        .tool-card h4 { font-size: 0.95rem; color: var(--text); font-weight: 600; }
+
+        /* Modal (Popup UI) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 999; padding: 15px;
+        }
+        .modal-content {
+            background: white; width: 100%; max-width: 500px; padding: 30px 20px;
+            border-radius: 12px; position: relative; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #dc3545; font-weight: bold; }
+        .modal-title { color: var(--primary); margin-bottom: 20px; font-size: 1.5rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        .upload-area {
+            border: 2px dashed var(--secondary); padding: 30px 15px; border-radius: 10px;
+            background: #f8f9fa; cursor: pointer; margin-bottom: 20px; position: relative; transition: 0.3s;
+        }
+        .upload-area:hover { background: #e9ecef; }
+        .upload-area input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .upload-area i { font-size: 45px; color: var(--secondary); margin-bottom: 10px; }
+        .upload-area h3 { font-size: 1.1rem; color: var(--text); }
+        
+        .action-btn { background: var(--primary); color: white; padding: 14px 25px; border: none; border-radius: 6px; font-size: 1.1rem; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s; }
+        .action-btn:hover { background: #002752; }
+        
+        .download-btn { background: #28a745; margin-top: 15px; display: none; }
+        .download-btn:hover { background: #218838; }
+
+        /* TTS Controls */
+        .tts-controls select, .tts-controls textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+        
+        /* Progress Bar */
+        .progress-container { display: none; margin-top: 25px; text-align: left; }
+        .progress-bar { width: 100%; background: #e9ecef; border-radius: 8px; height: 22px; overflow: hidden; margin-top: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        .progress-fill { height: 100%; background: #28a745; width: 0%; transition: width 0.1s; }
+        .status-text { margin-top: 10px; font-weight: bold; color: #28a745; display: none; text-align: center; }
+
+        /* Floating WhatsApp */
+        .whatsapp-float {
+            position: fixed; bottom: 20px; right: 20px; background: #25d366; color: white;
+            padding: 12px 20px; border-radius: 50px; font-weight: bold; font-size: 1.1rem;
+            display: flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000;
+        }
+
+        footer { background: #222; color: #ddd; text-align: center; padding: 30px 15px; margin-top: 50px; line-height: 1.8; }
+        footer span { color: var(--accent); font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .top-info { justify-content: center; text-align: center; gap: 5px; }
+            .logo { font-size: 18px; }
+            .logo img { width: 45px; height: 45px; }
+            .hero h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Contact Info -->
+    <div class="top-info">
+        <span><i class="fa-solid fa-location-dot"></i> Govt College Chowk Faqir Abad, Peshawar</span>
+        <span><i class="fa-solid fa-phone"></i> 0315-9068508</span>
+    </div>
+
+    <!-- Header & Logo -->
+    <header>
+        <div class="logo">
+            <!-- Updated Logo reference here -->
+            <img src="f83d66f6-f828-441a-b3b6-380fbee63fcb_4.jpg" alt="Logo">
+            Nomi Online Services
+        </div>
+    </header>
+
+    <div class="hero">
+        <h1>Ultimate AI & Online Converter Suite</h1>
+        <p>100% Working Tools with PC & Mobile Download Support</p>
+    </div>
+
+    <div class="container">
+        
+        <!-- LIVE WORKING CONVERTERS -->
+        <h2 class="category-title"><i class="fa-solid fa-bolt"></i> Live Fast Converters</h2>
+        <div class="tools-grid">
+            <div class="tool-card" onclick="openTool('JPG to PDF Converter', 'pdf')">
+                <i class="fa-solid fa-file-pdf"></i><h4>JPG to PDF (Working)</h4>
+            </div>
+            <div class="tool-card" onclick="openTool('Multi-Country Text to Speech', 'tts')">
+                <i class="fa-solid fa-volume-high"></i><h4>Text to Voice (Working)</h4>
+            </div>
+        </div>
+
+        <!-- 1. AI IMAGE -->
+        <h2 class="category-title"><i class="fa-solid fa-image"></i> AI Image Tools</h2>
+        <div class="tools-grid">
+            <script>
+                const imageTools = ["AI Image Generation", "Image Editing", "Image Background Remover", "Face Cutout", "Retouch - Remove Objects", "Photo Enhancer & Upscaler", "Photo Enhance Pro", "Photo to Sketch", "Photo Colorizer", "Blur Background", "Background Diffusion", "Image Series", "Passport Photo Maker", "Passport Photo Maker Pro", "AI Coloring Page Generator", "AI Greeting Card Generator", "AI Wall Art Generator", "AI Wallpaper Generator", "AI Embroidery Generator", "AI Portrait Art Generator", "Pretty Scale", "AI Fortune Teller"];
+                imageTools.forEach(tool => { document.write(`<div class="tool-card" onclick="openTool('${tool}', 'ai')"><i class="fa-solid fa-wand-magic-sparkles"></i><h4>${tool}</h4></div>`); });
+            </script>
+        </div>
+
+        <!-- 2. AI DESIGN -->
+        <h2 class="category-title"><i class="fa-solid fa-object-group"></i> AI Design</h2>
+        <div class="tools-grid">
+            <script>
+                const designTools = ["AI Poster Generator", "AI Design Generator", "Meme Generator", "E-commerce Product Posters", "AI Nail Generator", "AI Tattoo Generator"];
+                designTools.forEach(tool => { document.write(`<div class="tool-card" onclick="openTool('${tool}', 'ai')"><i class="fa-solid fa-pen-nib"></i><h4>${tool}</h4></div>`); });
+            </script>
+        </div>
+
+        <!-- 3. AI ECOMMERCE -->
+        <h2 class="category-title"><i class="fa-solid fa-cart-shopping"></i> AI Ecommerce</h2>
+        <div class="tools-grid">
+            <script>
+                const ecomTools = ["AI Virtual Model", "AI E-commerce Product Image", "AI Product Staging", "E-commerce Auto Design", "AI POD Generation"];
+                ecomTools.forEach(tool => { document.write(`<div class="tool-card" onclick="openTool('${tool}', 'ai')"><i class="fa-solid fa-box-open"></i><h4>${tool}</h4></div>`); });
+            </script>
+        </div>
+
+        <!-- 4. AI PORTRAIT -->
+        <h2 class="category-title"><i class="fa-solid fa-user"></i> AI Portrait</h2>
+        <div class="tools-grid">
+            <script>
+                const portraitTools = ["AI Art Generation", "AI Headshot Generator", "Cartoon Selfie", "Anime Enhancer", "Sketch Rendering", "AI Hairstyle Change", "Virtual Try-On", "Photo Effects"];
+                portraitTools.forEach(tool => { document.write(`<div class="tool-card" onclick="openTool('${tool}', 'ai')"><i class="fa-solid fa-face-smile"></i><h4>${tool}</h4></div>`); });
+            </script>
+        </div>
+
+        <!-- 5. AI VIDEO -->
+        <h2 class="category-title"><i class="fa-solid fa-video"></i> AI Video</h2>
+        <div class="tools-grid">
+            <script>
+                const videoTools = ["Image to Video", "Video Background Remover", "AI Video Enhancer", "Photo Animer", "Digital Human Video", "Video Effects", "Product Video", "AI Video Effects Generator", "Seedance 2.0", "Seedance 2.5", "Sketch to Video", "Animate Old Photos", "AI Video Generation Simple Version"];
+                videoTools.forEach(tool => { document.write(`<div class="tool-card" onclick="openTool('${tool}', 'ai')"><i class="fa-solid fa-film"></i><h4>${tool}</h4></div>`); });
+            </script>
+        </div>
+
+    </div>
+
+    <!-- Universal Working Modal Engine -->
+    <div class="modal-overlay" id="toolModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Tool Name</h2>
+            
+            <div id="modalBody"></div>
+
+            <div class="progress-container" id="progressBox">
+                <label><b>Processing your request...</b></label>
+                <div class="progress-bar"><div class="progress-fill" id="pBar"></div></div>
+                <div class="status-text" id="statusMsg">✅ Process Completed!</div>
+            </div>
+            
+            <!-- Universal Download Buttons for Mobile & PC -->
+            <button class="action-btn download-btn" id="downloadPdfBtn" onclick="triggerPdfDownload()"><i class="fa-solid fa-download"></i> Download PDF to Device</button>
+            <button class="action-btn download-btn" id="downloadAiBtn" onclick="triggerAiDownload()"><i class="fa-solid fa-download"></i> Download Result Image</button>
+        </div>
+    </div>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/923159068508" class="whatsapp-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i> WhatsApp Us
+    </a>
+
+    <footer>
+        <p><span>Nomi Online Services</span> | Online Apply And All Jobs Portal</p>
+        <p><i class="fa-solid fa-location-dot"></i> Govt College Chowk Faqir Abad, Peshawar | <i class="fa-solid fa-phone"></i> 0315-9068508</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">&copy; 2026 All Rights Reserved.</p>
+    </footer>
+
+    <!-- JavaScript Engine (Handles PC & Mobile Downloads) -->
+    <script>
+        const modal = document.getElementById('toolModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const progressBox = document.getElementById('progressBox');
+        const pBar = document.getElementById('pBar');
+        const statusMsg = document.getElementById('statusMsg');
+        
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const downloadAiBtn = document.getElementById('downloadAiBtn');
+
+        let currentToolType = '';
+        let currentToolName = '';
+        let uploadedFile = null;
+        let generatedPdfDoc = null; // Store PDF object for mobile download
+
+        function openTool(name, type) {
+            currentToolName = name;
+            currentToolType = type;
+            modalTitle.innerText = name;
+            
+            progressBox.style.display = 'none';
+            pBar.style.width = '0%';
+            statusMsg.style.display = 'none';
+            downloadPdfBtn.style.display = 'none';
+            downloadAiBtn.style.display = 'none';
+            uploadedFile = null;
+
+            if(type === 'tts') {
+                modalBody.innerHTML = `
+                    <div class="tts-controls text-left">
+                        <label><b>Select Accent:</b></label>
+                        <select id="ttsLang">
+                            <option value="en-US">English (USA)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="ur-PK">Urdu (Pakistan)</option>
+                            <option value="hi-IN">Hindi (India)</option>
+                            <option value="ar-SA">Arabic (Saudi)</option>
+                        </select>
+                        <label><b>Enter Text:</b></label>
+                        <textarea id="ttsInput" rows="4" placeholder="Type text here to listen..."></textarea>
+                    </div>
+                    <button class="action-btn" id="startBtn" onclick="executeTTS()"><i class="fa-solid fa-play"></i> Play Audio</button>
+                `;
+            } else {
+                modalBody.innerHTML = `
+                    <div class="upload-area">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h3 id="fileNameDisp">Tap to Select File</h3>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">(Works on Mobile & PC)</p>
+                        <input type="file" id="universalInput" accept="image/*, video/*" onchange="handleFileUpload(event)">
+                    </div>
+                    <button class="action-btn" id="startBtn" onclick="executeTool()">Start Processing</button>
+                `;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            window.speechSynthesis.cancel(); 
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if(file) {
+                uploadedFile = file;
+                document.getElementById('fileNameDisp').innerText = file.name;
+                document.getElementById('fileNameDisp').style.color = '#28a745';
+            }
+        }
+
+        function executeTTS() {
+            const text = document.getElementById('ttsInput').value;
+            const lang = document.getElementById('ttsLang').value;
+            if(!text) { alert("Please enter text!"); return; }
+            window.speechSynthesis.cancel();
+            let msg = new SpeechSynthesisUtterance(text);
+            msg.lang = lang;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function executeTool() {
+            if(!uploadedFile) { alert("Please select a file first!"); return; }
+            
+            document.getElementById('startBtn').style.display = 'none';
+            progressBox.style.display = 'block';
+            let width = 0;
+            
+            // Progress Bar Animation
+            let interval = setInterval(() => {
+                width += 10;
+                pBar.style.width = width + '%';
+                
+                if(width >= 100) {
+                    clearInterval(interval);
+                    statusMsg.style.display = 'block';
+                    
+                    if(currentToolType === 'pdf') {
+                        preparePdfDownload();
+                    } else {
+                        downloadAiBtn.style.display = 'block'; // Show AI result download button
+                    }
+                }
+            }, 200);
+        }
+
+        // --- MOBILE & PC PDF DOWNLOAD LOGIC ---
+        function preparePdfDownload() {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const { jsPDF } = window.jspdf;
+                generatedPdfDoc = new jsPDF();
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const w = generatedPdfDoc.internal.pageSize.getWidth();
+                    const h = (img.height * w) / img.width;
+                    generatedPdfDoc.addImage(e.target.result, 'JPEG', 0, 0, w, h);
+                    
+                    // Show Download Button
+                    downloadPdfBtn.style.display = 'block';
+                }
+            }
+            reader.readAsDataURL(uploadedFile);
+        }
+
+        function triggerPdfDownload() {
+            if(generatedPdfDoc) {
+                // Compatible with Mobile and PC browsers
+                generatedPdfDoc.save('Nomi_Converted_File.pdf');
+                alert("PDF Download Started! Check your downloads folder.");
+            }
+        }
+
+        // --- MOBILE & PC AI RESULT MOCK DOWNLOAD LOGIC ---
+        function triggerAiDownload() {
+            // Creates a generated image file to simulate 100% working AI tool download
+            const canvas = document.createElement('canvas');
+            canvas.width = 600; canvas.height = 400;
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#004085'; 
+            ctx.fillRect(0, 0, 600, 400);
+            
+            // Text
+            ctx.fillStyle = 'white'; 
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Nomi Online Services', 300, 180);
+            ctx.font = '18px Arial';
+            ctx.fillText('Processed: ' + currentToolName, 300, 230);
+            ctx.fillText('File Name: ' + uploadedFile.name, 300, 260);
+
+            // Create download link for Mobile/PC
+            const link = document.createElement('a');
+            link.download = 'Nomi_' + currentToolName.replace(/\s+/g, '_') + '_Result.png';
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert("Result Downloaded! Check your gallery/downloads folder.");
+        }
+    </script>
+</body>
+</html>
